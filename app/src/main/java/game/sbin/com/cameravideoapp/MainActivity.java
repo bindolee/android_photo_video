@@ -1,6 +1,8 @@
 package game.sbin.com.cameravideoapp;
 
+import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
@@ -50,7 +52,15 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-       /* FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        PackageManager pm = getPackageManager();
+        _hasCamera = pm.hasSystemFeature(PackageManager.FEATURE_CAMERA);
+        _hasFrontCamera = pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT);
+
+        if (!_hasCamera){
+            showNoCameraDialog();
+        }
+
+        /* FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -64,6 +74,13 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        if (!_hasCamera){
+            disableCameraMenuItems(menu);
+        }
+        else if (!_hasFrontCamera){
+            disableFrontCameraMenuItems(menu);
+        }
+
         return true;
     }
 
@@ -237,5 +254,27 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return photoFileUri;
+    }
+
+    void showNoCameraDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("No Camera");
+        builder.setMessage(
+                "Device does not have required camera support. " +
+                        "Some features will not be available.");
+        builder.setPositiveButton("Continue", null);
+        AlertDialog dialog = builder.create();
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.show();
+    }
+
+    void disableCameraMenuItems(Menu menu) {
+        menu.findItem(R.id.menuOpenBackCamera).setEnabled(false);
+        menu.findItem(R.id.menuOpenFrontCamera).setEnabled(false);
+        menu.findItem(R.id.menuCloseCamera).setEnabled(false);
+    }
+
+    void disableFrontCameraMenuItems(Menu menu) {
+        menu.findItem(R.id.menuOpenFrontCamera).setEnabled(false);
     }
 }
