@@ -180,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
         Uri VideoFileUri = null;
         File outputDir = getVideoDirectory();
         if (outputDir != null){
-            String timeStamp = new SimpleDateFormat("yyyyy_MMDD_HHMMSS")
+            String timeStamp = new SimpleDateFormat("yyyy_MMDD_HHMMSS")
                     .format(new Date());
             String photoFileName = "VID_" + timeStamp + ".mp4";
 
@@ -215,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
         Uri photoFileUri = null;
         File outputDir = getPhotoDirectory();
         if (outputDir != null){
-            String timeStamp = new SimpleDateFormat("yyyyy_MMDD_HHMMSS")
+            String timeStamp = new SimpleDateFormat("yyyy_MMDD_HHMMSS")
                     .format(new Date());
             String photoFileName = "IMG_" + timeStamp + ".jpg";
 
