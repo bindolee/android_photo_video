@@ -2,8 +2,10 @@ package game.sbin.com.cameravideoapp;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -12,6 +14,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.Toast;
+
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -59,6 +65,9 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_photo:
                 onMenuPhotoSimpleIntent(item);
                 break;
+            case R.id.action_photo_file:
+                onMenuPhotoIntentWithFileName(item);
+                break;
             case R.id.action_video:
                 break;
             default:
@@ -78,7 +87,12 @@ public class MainActivity extends AppCompatActivity {
 
     public void onMenuPhotoIntentWithFileName(MenuItem item) {
         logMenuChoice(item);
-
+        _photoFileUri = generateTimeStampPhotoFileUri();
+        if (_photoFileUri != null){
+            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, _photoFileUri);
+            startActivityForResult(intent, PHOTO_INTENT_WITH_FILENAME);
+        }
     }
 
 
@@ -115,6 +129,9 @@ public class MainActivity extends AppCompatActivity {
                 extras = resultIntent.getExtras();
                 imageBitmap = (Bitmap) extras.get("data");
                 break;
+            case PHOTO_INTENT_WITH_FILENAME:
+                imageBitmap = BitmapFactory.decodeFile(_photoFileUri.getPath());
+                break;
             default:
                 break;
         }
@@ -122,5 +139,40 @@ public class MainActivity extends AppCompatActivity {
         if (imageBitmap != null){
             imageView.setImageBitmap(imageBitmap);
         }
+    }
+
+    File getPhotoDirectory(){
+        File outputDir = null;
+        String externalStorageState = Environment.getExternalStorageState();
+        if (externalStorageState.equals(Environment.MEDIA_MOUNTED)){
+            File pictureDir = Environment
+                    .getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+            outputDir = new File(pictureDir, "Sbin_Photos");
+            if (!outputDir.exists()){
+                if (!outputDir.mkdirs()){
+                    Toast.makeText(this,
+                            "Failed to create directory" + outputDir.getAbsolutePath(),
+                            Toast.LENGTH_LONG).show();
+                    outputDir = null;
+                }
+            }
+        }
+
+        return outputDir;
+    }
+
+    Uri generateTimeStampPhotoFileUri() {
+        Uri photoFileUri = null;
+        File outputDir = getPhotoDirectory();
+        if (outputDir != null){
+            String timeStamp = new SimpleDateFormat("yyyyy_MMDD_HHMMSS")
+                    .format(new Date());
+            String photoFileName = "IMG_" + timeStamp + ".jpg";
+
+            File photoFile = new File(outputDir, photoFileName);
+            photoFileUri = Uri.fromFile(photoFile);
+        }
+
+        return photoFileUri;
     }
 }
