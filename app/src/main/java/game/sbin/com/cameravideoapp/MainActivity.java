@@ -3,6 +3,7 @@ package game.sbin.com.cameravideoapp;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -29,6 +30,18 @@ public class MainActivity extends AppCompatActivity {
 
     Uri _photoFileUri;
     Uri _videoFileUri;
+
+    final String SELECTED_CAMERA_ID_KEY = "_selectedCameraId";
+    final int CAMERA_ID_NOT_SET = -1;
+
+    int _frontFacingCameraId = CAMERA_ID_NOT_SET;
+    int _backFacingCameraId = CAMERA_ID_NOT_SET;
+
+    boolean _hasCamera = false;
+    boolean _hasFrontCamera = false;
+
+    int _selectedCameraId;
+    //Camera _selectedCamera;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
