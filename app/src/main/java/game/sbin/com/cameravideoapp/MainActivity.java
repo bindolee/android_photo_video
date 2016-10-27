@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
                 onMenuPhotoIntentWithFileName(item);
                 break;
             case R.id.action_video:
+                onMenuVideoIntent(item);
                 break;
             default:
                 break;
@@ -98,6 +99,14 @@ public class MainActivity extends AppCompatActivity {
 
     public void onMenuVideoIntent(MenuItem item) {
         logMenuChoice(item);
+
+        _videoFileUri = generateTimeStampVideoFileUri();
+        if (_videoFileUri != null){
+            Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, _videoFileUri);
+            intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 0);
+            startActivityForResult(intent, VIDEO_INTENT_SIMPLE);
+        }
     }
 
     public void onExit(MenuItem item) {
@@ -132,6 +141,8 @@ public class MainActivity extends AppCompatActivity {
             case PHOTO_INTENT_WITH_FILENAME:
                 imageBitmap = BitmapFactory.decodeFile(_photoFileUri.getPath());
                 break;
+            case VIDEO_INTENT_SIMPLE:
+                break;
             default:
                 break;
         }
@@ -139,6 +150,45 @@ public class MainActivity extends AppCompatActivity {
         if (imageBitmap != null){
             imageView.setImageBitmap(imageBitmap);
         }
+
+        /*sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED,
+                Uri.parse("file://" + Environment.getExternalStorageDirectory())));
+    */
+    }
+
+    File getVideoDirectory(){
+        File outputDir = null;
+        String externalStorageState = Environment.getExternalStorageState();
+        if (externalStorageState.equals(Environment.MEDIA_MOUNTED)){
+            File pictureDir = Environment
+                    .getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
+            outputDir = new File(pictureDir, "Sbin_Videos");
+            if (!outputDir.exists()){
+                if (!outputDir.mkdirs()){
+                    Toast.makeText(this,
+                            "Failed to create directory" + outputDir.getAbsolutePath(),
+                            Toast.LENGTH_LONG).show();
+                    outputDir = null;
+                }
+            }
+        }
+
+        return outputDir;
+    }
+
+    Uri generateTimeStampVideoFileUri() {
+        Uri VideoFileUri = null;
+        File outputDir = getVideoDirectory();
+        if (outputDir != null){
+            String timeStamp = new SimpleDateFormat("yyyyy_MMDD_HHMMSS")
+                    .format(new Date());
+            String photoFileName = "VID_" + timeStamp + ".mp4";
+
+            File photoFile = new File(outputDir, photoFileName);
+            VideoFileUri = Uri.fromFile(photoFile);
+        }
+
+        return VideoFileUri;
     }
 
     File getPhotoDirectory(){
